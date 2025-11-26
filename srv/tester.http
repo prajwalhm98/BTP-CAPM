@@ -1,0 +1,26 @@
+
+http://localhost:4004/odata/v4/CatalogService
+
+
+http://localhost:4004/odata/v4/CatalogService/$metadata
+
+
+http://localhost:4004/odata/v4/CatalogService/employeeSet
+
+http://localhost:4004/odata/v4/CatalogService/addressset
+
+http://localhost:4004/odata/v4/CatalogService/employeeSet?$top=10&&skip=2
+
+http://localhost:4004/odata/v4/CatalogService/employeeSet?$select=loginname
+
+http://localhost:4004/odata/v4/CatalogService/PO/74867AD200E41EDBA5D8B0C98DC28052
+
+http://localhost:4004/odata/v4/CatalogService/products/74867AD200E41EDBA5D8B06B26F92052/To_Items
+
+
+POST http://localhost:4004/odata/v4/CatalogService/PO/74867AD200E41EDBA5D8B0C98DC28052/CatalogService.boost
+Content-Type: application/json
+
+{}
+
+ http://localhost:4004/odata/v4/CatalogService/product
