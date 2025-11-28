@@ -1,0 +1,96 @@
+_schema-version: 3.3.0
+ID: mycap
+description: A simple CAP project.
+version: 1.0.0
+modules:
+  - name: mycap-srv
+    type: nodejs
+    path: gen/srv
+    requires:
+      - name: mycap-db
+      - name: uaa_mycap
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    parameters:
+      buildpack: nodejs_buildpack
+      instances: 1
+    build-parameters:
+      builder: npm-ci
+  - name: mycap-db-deployer
+    type: hdb
+    path: gen/db
+    requires:
+      - name: mycap-db
+    parameters:
+      buildpack: nodejs_buildpack
+  - name: mycap-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: mycap-destination-service
+        parameters:
+          content-target: true
+      - name: mycap_html_repo_host
+        parameters:
+          service-key:
+            name: mycap_html_repo_host-key
+      - name: uaa_mycap
+        parameters:
+          service-key:
+            name: uaa_mycap-key
+    parameters:
+      content:
+        instance:
+          destinations:
+            - Name: AppRouter_mycap_html_repo_host
+              ServiceInstanceName: mycap-html5-app-host-service
+              ServiceKeyName: mycap_html_repo_host-key
+              sap.cloud.service: AppRouter
+            - Authentication: OAuth2UserTokenExchange
+              Name: AppRouter_uaa_mycap
+              ServiceInstanceName: mycap-xsuaa-service
+              ServiceKeyName: uaa_mycap-key
+              sap.cloud.service: AppRouter
+          existing_destinations_policy: ignore
+    build-parameters:
+      no-source: true
+resources:
+  - name: mycap-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: mycap-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        version: 1.0.0
+      service: destination
+      service-name: mycap-destination-service
+      service-plan: lite
+  - name: mycap_html_repo_host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-name: mycap-html5-app-host-service
+      service-plan: app-host
+  - name: uaa_mycap
+    type: org.cloudfoundry.managed-service
+    parameters:
+      path: ./xs-security.json
+      service: xsuaa
+      service-name: mycap-xsuaa-service
+      service-plan: application
+      config:
+        xsappname: mycap-${org}-${space}
+        tenant-mode: dedicated
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
