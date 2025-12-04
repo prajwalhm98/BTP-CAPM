@@ -3,6 +3,21 @@ ID: mycap
 description: A simple CAP project.
 version: 1.0.0
 modules:
+  - name: mycapapp-ui
+    type: nodejs
+    path: app
+    parameters:
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm-ci
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api
+          strictSSL: true
+          forwardAuthToken: true
+          url: '~{srv-url}'
   - name: mycap-srv
     type: nodejs
     path: gen/srv
